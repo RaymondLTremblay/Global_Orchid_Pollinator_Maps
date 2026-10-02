@@ -1,0 +1,18 @@
+# Files rsconnect should NOT upload when publishing the Shiny document.
+# The app needs only mapa_final.qmd, the workbook and the biome overlay.
+docs
+mapa_final_files
+mapa_final_static_files
+pollinator_map_files
+.quarto
+.Rproj.user
+.git
+.RData
+.Rhistory
+mapa_final.html
+mapa_final_static.html
+pollinator_map.html
+mapa_final_static.qmd
+pollinator_map.qmd
+README.md
+CLAUDE.md

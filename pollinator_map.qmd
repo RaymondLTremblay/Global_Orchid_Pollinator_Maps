@@ -1,0 +1,329 @@
+---
+title: "Orchid Pollinators — Interactive Map"
+subtitle: "Global Orchid Pollinators · search by orchid and by pollinator"
+author: "Raymond L. Tremblay, Natalia Palou, Caleb Pacheco and Naan Lamoso"
+date: today
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: false
+    theme: flatly
+    page-layout: full
+server: shiny
+lang: en
+---
+
+```{=html}
+<style>
+/* Leaflet draws its own controls at z-index 1000, which puts the +/- zoom
+   buttons on top of any menu the filters above the map open. Drop the control
+   layer below the page's menus (it still sits above every map pane, so the
+   buttons stay visible over the tiles). */
+.leaflet-top, .leaflet-bottom { z-index: 700 !important; }
+.selectize-dropdown          { z-index: 2000 !important; }
+</style>
+```
+
+
+```{r}
+#| context: setup
+#| include: false
+library(shiny); library(leaflet); library(DT)
+library(openxlsx); library(dplyr); library(tidyr); library(stringr); library(htmltools)
+
+# ---------------------------------------------------------------------------
+# Data source: the ENRICHED workbook produced by `pollinators_wrangling.qmd`
+# (sheets `species` = original + poll_* columns, and `pollinators_long` = one
+# pollinator taxon per row). Run that document first; the parsing lives there,
+# so this map never re-parses the raw text. If the file is renamed, edit here.
+# ---------------------------------------------------------------------------
+data_path <- "Pollination_List_pollinators_enriched.xlsx"
+sp <- read.xlsx(data_path, "species")
+lg <- read.xlsx(data_path, "pollinators_long")
+
+# text coordinates ("18,23") -> numbers
+a_num <- function(x){ x <- gsub("\\s+","",x); x <- gsub(",",".",x); suppressWarnings(as.numeric(x)) }
+sp$row    <- seq_len(nrow(sp))                       # stable id == pollinators_long$row
+sp$lat    <- a_num(sp$latitud); sp$lon <- a_num(sp$longitud)
+sp$orchid <- str_squish(paste(ifelse(is.na(sp$genus),"",sp$genus),
+                              ifelse(is.na(sp$species),"",sp$species)))
+# How exact the coordinates are (`coord_precision`, from the georeferencing
+# tracker). Blank for records georeferenced before the tracker existed.
+if (!"coord_precision" %in% names(sp)) sp$coord_precision <- NA_character_
+# Biome and ecoregion (RESOLVE Ecoregions 2017), added by the wrangling doc.
+for (cl in c("biome", "ecoregion")) if (!cl %in% names(sp)) sp[[cl]] <- NA_character_
+eco_row <- function(label, value) if (is.na(value) || !nzchar(value)) "" else
+  paste0("<b>", label, ":</b> ", htmlEscape(value), "<br>")
+precision_labels <- c(site = "study site", locality = "named locality",
+                      region = "general area (state, country or region)")
+precision_label <- function(p) {
+  p <- tolower(trimws(as.character(p)))
+  ifelse(p %in% names(precision_labels), unname(precision_labels[p]), "not recorded")
+}
+geo <- sp %>% filter(!is.na(lat) & !is.na(lon))      # only georeferenced records reach the map
+
+# per-record pollinator richness and a single "primary" group (for point colour)
+rich <- lg %>% group_by(row) %>%
+  summarise(richness = n_distinct(na.omit(dplyr::coalesce(poll_taxon, poll_genus))),
+            .groups = "drop")
+# EVERY group a record belongs to, not just the commonest. `slice_max(n = 1)`
+# used to pick one group for the point colour, which meant a record visited by
+# bees, a syrphid and a scarab was drawn as "Bees" alone: the other two groups
+# never reached the legend, and a reader filtering on Coleoptera would not see
+# it. `with_ties = FALSE` also broke ties arbitrarily. Keep them all.
+# Only the records that actually reach the map. `lg` covers the whole database,
+# where Arachnida, Thysanoptera, Orthoptera, Mammalia and Reptilia all occur --
+# but none of those records is georeferenced yet, so listing them in the legend
+# advertised groups that appear nowhere on the map.
+grp <- lg %>% filter(row %in% geo$row, !is.na(poll_group)) %>%
+  distinct(row, poll_group)
+
+# The single group used for the point colour is still the commonest, because a
+# marker can only take one fill -- but the legend and the filters now work off
+# the full set, so nothing is hidden by that choice.
+prim <- lg %>% filter(!is.na(poll_group)) %>% count(row, poll_group) %>%
+  group_by(row) %>% slice_max(n, n = 1, with_ties = FALSE) %>%
+  transmute(row, primary_group = poll_group) %>% ungroup()
+geo <- geo %>% left_join(rich, by = "row") %>% left_join(prim, by = "row") %>%
+  mutate(richness = ifelse(is.na(richness), 0, richness),
+         primary_group = ifelse(is.na(primary_group), "No pollinator in the source", primary_group))
+
+# colourblind-friendly (Okabe–Ito) palette for the coarse pollinator groups.
+# "No pollinator in the source" = a georeferenced record with no pollinator group recorded yet
+# (usually its `pollinators` cell is empty).
+group_colors <- c(Bees = "#E69F00", Wasps = "#D55E00",
+                  "Hymenoptera (unassigned)" = "#8C6D31",
+                  Diptera = "#56B4E9", Lepidoptera = "#CC79A7",
+                  Coleoptera = "#009E73", Hemiptera = "#F0E442",
+                  Thysanoptera = "#7F7F7F", Orthoptera = "#B07A2A",
+                  Arachnida = "#8C8C8C", Aves = "#0072B2",
+                  Mammalia = "#666666", Reptilia = "#4D4D4D",
+                  "No pollinator in the source" = "#BBBBBB")
+col_of <- function(g) unname(ifelse(g %in% names(group_colors), group_colors[g], "#999999"))
+
+# Fixed display order for the legend -- taxonomic, not frequency-based, so the
+# legend does not rearrange itself as the filters change the counts. The three
+# Hymenoptera categories stay adjacent, insects precede vertebrates, and
+# "No pollinator in the source" is pinned last. Unlisted groups fall to the end alphabetically.
+group_order <- c("Bees", "Wasps", "Hymenoptera (unassigned)",
+                 "Diptera", "Lepidoptera", "Coleoptera", "Hemiptera",
+                 "Thysanoptera", "Orthoptera", "Arachnida",
+                 "Aves", "Mammalia", "Reptilia",
+                 "No pollinator in the source")
+order_groups <- function(g) {
+  g <- unique(g)
+  known <- intersect(group_order, g)
+  c(known, sort(setdiff(g, known)))
+}
+
+# Fixed display order for the subfamilies: the phylogeny of the family, from
+# the earliest-diverging lineage onward. Apostasioideae is sister to the rest,
+# then Cypripedioideae, then Vanilloideae, then the Orchidoideae plus
+# Epidendroideae pair. Every table, map series and menu here uses it, so the
+# reader moves through the family in the same sequence each time and can read
+# a gap in coverage as a position on the tree. Anything unlisted, including
+# "No subfamily", falls to the end.
+subfamily_order <- c("Apostasioideae", "Cypripedioideae", "Vanilloideae",
+                     "Orchidoideae", "Epidendroideae")
+order_subfamilies <- function(s) {
+  s <- unique(s)
+  known <- intersect(subfamily_order, s)
+  c(known, sort(setdiff(s, known)))
+}
+# The legend lists every group PRESENT IN THE DATA, not only those that happen
+# to be some record's commonest group -- Hemiptera is never a commonest group
+# and so used to be missing from the legend entirely.
+groups_present <- unique(c(grp$poll_group,
+                           geo$primary_group[geo$primary_group == "No pollinator in the source"]))
+pal_groups <- order_groups(intersect(names(group_colors), groups_present))
+
+# NOTE: do not build this legend with colorFactor(). Given a character domain it
+# sorts the levels internally, then pairs them with the palette vector in the
+# order supplied -- so a hand-ordered palette silently ends up attached to the
+# wrong labels. The markers already colour themselves through col_of(), so the
+# legend is drawn from explicit colour/label pairs instead and cannot drift.
+legend_colors <- col_of(pal_groups)
+
+# choice vectors for the filters
+ch <- list(
+  subfamily = order_subfamilies(geo$subfamily),
+  ogenus    = sort(unique(geo$genus)),
+  ospecies  = sort(unique(geo$orchid)),
+  pgroup    = order_groups(na.omit(lg$poll_group)),   # same fixed order as the legend
+  porder    = sort(unique(na.omit(lg$poll_order))),
+  pfamily   = sort(unique(na.omit(lg$poll_family))),
+  pgenus    = sort(unique(na.omit(lg$poll_genus))))
+
+# ---- filter engine (AND across every active control) ----
+apply_filters <- function(sub, ogen, ospp, pord, pfam, pgen, pgrp){
+  rows <- geo$row
+  if (length(sub))  rows <- intersect(rows, geo$row[geo$subfamily %in% sub])
+  if (length(ogen)) rows <- intersect(rows, geo$row[geo$genus %in% ogen])
+  if (length(ospp)) rows <- intersect(rows, geo$row[geo$orchid %in% ospp])
+  pf <- list(poll_order = pord, poll_family = pfam, poll_genus = pgen, poll_group = pgrp)
+  for (f in names(pf)) if (length(pf[[f]]))
+    rows <- intersect(rows, unique(lg$row[lg[[f]] %in% pf[[f]]]))
+  geo %>% filter(row %in% rows)
+}
+
+# ---- popup: EVERY pollinator of the record, grouped order > family > species ----
+# Every family line opens with the coloured dot of the pollinator group it
+# belongs to -- the same colour the point is drawn in and the same swatch the
+# legend shows. Nobody outside entomology is obliged to know that Halictidae
+# are bees and Syrphidae are flies, and the dot says so without a caption.
+dot <- function(g) if (is.na(g)) "" else sprintf(
+  paste0("<span title='%s' style='display:inline-block;width:9px;height:9px;",
+         "border-radius:50%%;background:%s;border:1px solid #444;",
+         "margin-right:5px;vertical-align:middle'></span>"),
+  htmlEscape(g), col_of(g))
+
+popup_html <- function(r){
+  s <- geo[geo$row == r, ]; d <- lg %>% filter(row == r)
+  block <- ""
+  if (nrow(d)) {
+    d <- d %>% mutate(lab = case_when(
+      rank == "taxon" ~ paste0("<i>", poll_taxon, "</i>"),
+      rank == "genus" ~ paste0("<i>", poll_genus, "</i> sp."),
+      TRUE            ~ htmlEscape(verbatim))) %>% arrange(poll_order, poll_family)
+    for (ord in unique(d$poll_order)) {
+      dd <- d %>% filter(poll_order == ord | (is.na(poll_order) & is.na(ord)))
+      block <- paste0(block, "<div style='margin-top:3px'><b>",
+                      ifelse(is.na(ord), "(unspecified)", ord), "</b>")
+      for (fm in unique(dd$poll_family)) {
+        ff  <- dd %>% filter(poll_family == fm | (is.na(poll_family) & is.na(fm)))
+        grp <- if (all(is.na(ff$poll_group))) NA_character_ else na.omit(ff$poll_group)[1]
+        lab <- ifelse(is.na(fm), "", paste0(" <span style='color:#666'>(", fm, ")</span>"))
+        block <- paste0(block,
+                        "<div style='margin-left:10px;padding-left:15px;text-indent:-15px'>",
+                        dot(grp), lab, " ",
+                        paste(unique(ff$lab), collapse = ", "), "</div>")
+      }
+      block <- paste0(block, "</div>")
+    }
+  }
+  paste0("<div style='font-size:13px;max-width:340px'>",
+    "<div style='font-size:15px;margin-bottom:2px'><b><i>", htmlEscape(s$orchid), "</i></b></div>",
+    "<b>Subfamily:</b> ", htmlEscape(s$subfamily), "<br>",
+    "<b>Locality:</b> ", ifelse(is.na(s$locality), "—", htmlEscape(s$locality)), "<br>",
+    # Approximate by design: every site was moved 10 to 25 km before publication.
+    "<b>Position:</b> ", round(s$lat, 2), " , ", round(s$lon, 2),
+    " <span style='color:#888'>(approximate: displaced 10 to 25 km)</span><br>",
+    "<b>Precision:</b> ", precision_label(s$coord_precision), "<br>",
+    eco_row("Biome", s$biome), eco_row("Ecoregion", s$ecoregion),
+    "<b>Pollinators</b> (", s$richness, "):", block,
+    if (!is.na(s$references)) paste0("<div style='margin-top:5px;color:#888;font-size:11px'>",
+                                     htmlEscape(s$references), "</div>") else "",
+    "</div>")
+}
+```
+
+Each point is one georeferenced orchid record. Use the filters to narrow by
+**orchid** (subfamily, genus, species) and/or by **pollinator** (group, order,
+family, genus) — every control combines with AND. Point **colour** is the
+record's main pollinator group; point **size** grows with the number of
+pollinator taxa. Click a point (or a table row) to see **all** its pollinators.
+
+```{r}
+#| panel: sidebar
+#| width: 320
+tags$h5("Orchid")
+selectizeInput("subfamily", "Subfamily",      ch$subfamily, multiple = TRUE)
+selectizeInput("ogenus",    "Genus",          ch$ogenus,    multiple = TRUE)
+selectizeInput("ospecies",  "Species",        ch$ospecies,  multiple = TRUE,
+               options = list(placeholder = "type to search..."))
+tags$hr()
+tags$h5("Pollinator")
+selectizeInput("pgroup",  "Group",  ch$pgroup,  multiple = TRUE)
+selectizeInput("porder",  "Order",  ch$porder,  multiple = TRUE)
+selectizeInput("pfamily", "Family", ch$pfamily, multiple = TRUE,
+               options = list(placeholder = "type to search..."))
+selectizeInput("pgenus",  "Genus",  ch$pgenus,  multiple = TRUE,
+               options = list(placeholder = "type to search..."))
+tags$hr()
+actionButton("reset", "Reset filters", class = "btn-sm btn-outline-secondary")
+tags$div(style = "margin-top:10px;font-weight:600;", textOutput("count"))
+```
+
+```{r}
+#| panel: fill
+leafletOutput("map", height = "540px")
+tags$br()
+DTOutput("tbl")
+```
+
+```{r}
+#| context: server
+
+filtered <- reactive({
+  apply_filters(input$subfamily, input$ogenus, input$ospecies,
+                input$porder, input$pfamily, input$pgenus, input$pgroup)
+})
+
+output$count <- renderText({
+  paste0(nrow(filtered()), " of ", nrow(geo), " records shown")
+})
+
+# base map drawn once; markers are updated by proxy so filtering is fast
+output$map <- renderLeaflet({
+  leaflet() %>%
+    # "Satellite + borders" (default): imagery, so land cover stays visible, with
+    # country borders and, on zooming in, states and provinces laid over it.
+    # "Political": the Esri topographic map, same boundaries over shaded relief.
+    addProviderTiles(providers$Esri.WorldImagery, group = "Satellite + borders") %>%
+    addTiles(urlTemplate = "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+             attribution = "Boundaries and places: Esri", group = "Satellite + borders") %>%
+    addTiles(urlTemplate = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+             attribution = "Topographic map: Esri", group = "Political") %>%
+    addLayersControl(baseGroups = c("Satellite + borders", "Political"),
+                     options = layersControlOptions(collapsed = TRUE)) %>%
+    addLegend("bottomright", colors = legend_colors, labels = pal_groups,
+              title = "Pollinator group", opacity = 0.9) %>%
+    # maxZoom keeps a filter that leaves a single point from dropping the
+    # reader into a street-level view with nothing recognisable in it.
+    fitBounds(min(geo$lon), min(geo$lat), max(geo$lon), max(geo$lat),
+              options = list(maxZoom = 8))
+})
+
+observe({
+  df <- filtered()
+  proxy <- leafletProxy("map") %>% clearGroup("pts")
+  if (nrow(df)) {
+    proxy %>% addCircleMarkers(
+      data = df, lng = ~lon, lat = ~lat, layerId = ~row, group = "pts",
+      radius = ~pmin(4 + 2.6 * sqrt(richness), 16),
+      color = "#333", weight = 0.6,
+      fillColor = ~col_of(primary_group), fillOpacity = 0.85,
+      label = ~lapply(orchid, function(x) HTML(paste0("<i>", x, "</i>"))),
+      popup = ~vapply(row, popup_html, character(1)),
+      clusterOptions = markerClusterOptions(
+        spiderfyOnMaxZoom = TRUE, disableClusteringAtZoom = 9,
+        showCoverageOnHover = FALSE))
+  }
+})
+
+# linked table -> click a row to fly to that record and open its popup
+output$tbl <- renderDT({
+  filtered() %>%
+    transmute(Orchid = orchid, Subfamily = subfamily, Locality = locality,
+              `Colour by` = primary_group, `All pollinator groups` = poll_groups,
+              Taxa = richness, Lat = round(lat, 2), Lon = round(lon, 2))
+}, selection = "single", rownames = FALSE,
+   options = list(pageLength = 8, scrollX = TRUE), server = TRUE)
+
+observeEvent(input$tbl_rows_selected, {
+  i <- input$tbl_rows_selected; df <- filtered()
+  if (length(i) && i <= nrow(df)) {
+    rec <- df[i, ]
+    leafletProxy("map") %>%
+      setView(lng = rec$lon, lat = rec$lat, zoom = 8) %>%
+      clearGroup("sel") %>%
+      addPopups(rec$lon, rec$lat, popup_html(rec$row), group = "sel")
+  }
+})
+
+# reset every filter
+observeEvent(input$reset, {
+  for (id in c("subfamily","ogenus","ospecies","pgroup","porder","pfamily","pgenus"))
+    updateSelectizeInput(session, id, selected = character(0))
+})
+```
