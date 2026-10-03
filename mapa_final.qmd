@@ -1,5 +1,5 @@
 ---
-title: "Orchid Pollinators — Global Distribution"
+title: "Orchid Pollinators: Global Distribution"
 author: "Raymond L. Tremblay, Natalia Palou, Caleb Pacheco and Naan Lamoso"
 date: today
 date-format: "D MMMM YYYY"
@@ -32,7 +32,7 @@ lang: en
   This is the Quarto version of the original `mapa_final.rmd` (now in
   `_archive/`). It uses Shiny
   (`server: shiny` in the header above), so run it with **Run Document** in
-  RStudio, or with `quarto preview mapa_final.qmd` in the terminal — not a plain
+  RStudio, or with `quarto preview mapa_final.qmd` in the terminal, not a plain
   static render, which cannot start the Shiny app at the end.
 
   Data source: the ENRICHED workbook produced by `pollinators_wrangling.qmd`
@@ -161,6 +161,12 @@ subf_col  <- find_col(col_names, "^subfamily$")
 # the georeferencing tracker. It is blank for records georeferenced before the
 # tracker existed, and the popup then says so rather than implying a level.
 prec_col  <- find_col(col_names, "^coord_precision$")
+# The record's references, and the one the mapped point comes from
+# (`coord_reference`, blank when it was not recorded). The database lists the
+# pollinators of a taxon from all its references, not per site, so the popup
+# says which paper the point belongs to and that the list is the taxon's.
+ref_col   <- find_col(col_names, "^references$")
+cref_col  <- find_col(col_names, "^coord_reference$")
 # Biome and ecoregion come from the wrangling doc. An enriched workbook written
 # before those columns existed, or on a machine without the lookup layer, does
 # not have them (read.xlsx drops a column that is entirely empty), so make sure
@@ -292,6 +298,8 @@ map_data <- data %>%
       trimws(paste(ifelse(is.na(gen), "", gen), ifelse(is.na(epi), "", epi)))
     },
     locality = if (!is.na(loc_col)) as.character(.data[[loc_col]]) else NA_character_,
+    references = if (!is.na(ref_col)) trimws(as.character(.data[[ref_col]])) else NA_character_,
+    coord_ref  = if (!is.na(cref_col)) trimws(as.character(.data[[cref_col]])) else NA_character_,
 
     # Coordinate precision, kept only when it is one of the three known levels.
     precision = {
@@ -465,7 +473,7 @@ map_data <- map_data %>%
     "<div style='font-size:13px;max-width:330px'>",
     "<div style='font-size:15px;margin-bottom:2px'><b><i>", sci_name, "</i></b></div>",
     "<b>Subfamily:</b> ", subfamily_label, "<br>",
-    "<b>Locality:</b> ", ifelse(is.na(locality), "—", locality), "<br>",
+    "<b>Locality:</b> ", ifelse(is.na(locality), "not recorded", locality), "<br>",
     # Two decimals only: the position is approximate by design.
     "<b>Position:</b> ", round(lat, 2), " , ", round(lon, 2),
     ifelse(!is.na(coord_displaced) & as.logical(coord_displaced),
@@ -473,6 +481,8 @@ map_data <- map_data %>%
     "<br>",
     "<b>Precision:</b> ",
     ifelse(is.na(precision), "not recorded", unname(precision_labels[precision])), "<br>",
+    ifelse(is.na(coord_ref) | coord_ref == "", "",
+           paste0("<b>Point from:</b> ", htmltools::htmlEscape(coord_ref), "<br>")),
     trait_row("Biome", biome),
     trait_row("Ecoregion", ecoregion),
     trait_row("Growth form",     growth_form),
@@ -485,10 +495,14 @@ map_data <- map_data %>%
     # group is already obvious from the point's colour.
     ifelse(is.na(pollinator_all) | !grepl(";", pollinator_all), "",
            paste0("<b>Pollinator groups:</b> ", group_chips(pollinator_all), "<br>")),
-    "<b>Pollinators:</b> ",
+    "<b>Pollinators recorded for this taxon</b> ",
+    "<span style='color:#888'>(all references, not only this site)</span>: ",
     ifelse(is.na(poll_species) | poll_species == "",
            paste0(pollinator, " <span style='color:#888'>(the source names none)</span>"),
            paste0("<br>", poll_species)),
+    ifelse(is.na(references) | references == "", "",
+           paste0("<div style='margin-top:5px;color:#888;font-size:11px'><b>References:</b> ",
+                  htmltools::htmlEscape(references), "</div>")),
     "</div>"
   ))
 ```
@@ -739,8 +753,8 @@ ggplot(coverage, aes(y = subfamily)) +
 ```
 
 Composition of the mapped records by pollinator group follows, in the same
-colours as the map points. A record with several groups — *Cypripedium reginae*
-is visited by bees, a syrphid and a scarab — is counted under **each** of them,
+colours as the map points. A record with several groups (*Cypripedium reginae*
+is visited by bees, a syrphid and a scarab) is counted under **each** of them,
 exactly as it is drawn on the map, so the bars sum to more than the number of
 records. *No pollinator in the source* means the paper behind that record
 named none, usually because it reported something else about the flower: a

@@ -1,5 +1,5 @@
 ---
-title: "Orchid Pollinators — Interactive Map"
+title: "Orchid Pollinators: Interactive Map"
 subtitle: "Global Orchid Pollinators · search by orchid and by pollinator"
 author: "Raymond L. Tremblay, Natalia Palou, Caleb Pacheco and Naan Lamoso"
 date: today
@@ -50,6 +50,8 @@ sp$orchid <- str_squish(paste(ifelse(is.na(sp$genus),"",sp$genus),
 # How exact the coordinates are (`coord_precision`, from the georeferencing
 # tracker). Blank for records georeferenced before the tracker existed.
 if (!"coord_precision" %in% names(sp)) sp$coord_precision <- NA_character_
+# Which reference the mapped point comes from (blank when not recorded).
+if (!"coord_reference" %in% names(sp)) sp$coord_reference <- NA_character_
 # Biome and ecoregion (RESOLVE Ecoregions 2017), added by the wrangling doc.
 for (cl in c("biome", "ecoregion")) if (!cl %in% names(sp)) sp[[cl]] <- NA_character_
 eco_row <- function(label, value) if (is.na(value) || !nzchar(value)) "" else
@@ -204,13 +206,15 @@ popup_html <- function(r){
   paste0("<div style='font-size:13px;max-width:340px'>",
     "<div style='font-size:15px;margin-bottom:2px'><b><i>", htmlEscape(s$orchid), "</i></b></div>",
     "<b>Subfamily:</b> ", htmlEscape(s$subfamily), "<br>",
-    "<b>Locality:</b> ", ifelse(is.na(s$locality), "—", htmlEscape(s$locality)), "<br>",
+    "<b>Locality:</b> ", ifelse(is.na(s$locality), "not recorded", htmlEscape(s$locality)), "<br>",
     # Approximate by design: every site was moved 10 to 25 km before publication.
     "<b>Position:</b> ", round(s$lat, 2), " , ", round(s$lon, 2),
     " <span style='color:#888'>(approximate: displaced 10 to 25 km)</span><br>",
     "<b>Precision:</b> ", precision_label(s$coord_precision), "<br>",
+    eco_row("Point from", s$coord_reference),
     eco_row("Biome", s$biome), eco_row("Ecoregion", s$ecoregion),
-    "<b>Pollinators</b> (", s$richness, "):", block,
+    "<b>Pollinators recorded for this taxon</b> (", s$richness, ") ",
+    "<span style='color:#888'>(all references, not only this site)</span>:", block,
     if (!is.na(s$references)) paste0("<div style='margin-top:5px;color:#888;font-size:11px'>",
                                      htmlEscape(s$references), "</div>") else "",
     "</div>")
@@ -219,7 +223,7 @@ popup_html <- function(r){
 
 Each point is one georeferenced orchid record. Use the filters to narrow by
 **orchid** (subfamily, genus, species) and/or by **pollinator** (group, order,
-family, genus) — every control combines with AND. Point **colour** is the
+family, genus); every control combines with AND. Point **colour** is the
 record's main pollinator group; point **size** grows with the number of
 pollinator taxa. Click a point (or a table row) to see **all** its pollinators.
 

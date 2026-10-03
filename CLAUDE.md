@@ -32,6 +32,18 @@ renders `mapa_final_static.qmd` into `docs/`, rewrites `manifest.json` and
 refreshes the figures in `docs/index.html`. Then commit and push both
 projects.
 
+## Where it is published
+
+- Site (GitHub Pages, branch main, folder /docs):
+  <https://raymondltremblay.github.io/Global_Orchid_Pollinator_Maps/>
+- Explorer (Posit Connect Cloud, NOT shinyapps.io):
+  <https://raymondltremblay-global-orchid-pollinators.share.connect.posit.cloud/>.
+  It builds from this repository on every push (framework Quarto, primary file
+  `mapa_final.qmd`, read from `manifest.json`). The address comes from the
+  custom name `global-orchid-pollinators` in the content's URL settings; if the
+  content is ever deleted and published again, set that name again so the link
+  on the landing page keeps working.
+
 ## Conventions
 
 - All code lives in `.qmd` documents.
@@ -43,3 +55,13 @@ projects.
 - Genus and species names in italics. No em-dashes.
 - Raymond commits and pushes with GitHub Desktop. Never run git from the Mac
   shell Claude uses: it leaves a lock file it cannot delete.
+
+**Pollinators are per taxon, not per site** (since 2026-10-03, after J. D.
+Ackerman's *Calypso* question). The database lists the pollinators of a taxon
+from all its references; the mapped point usually comes from one of them. So
+the popups (all three map documents) head the list "Pollinators recorded for
+this taxon (all references, not only this site)", list the record's
+references, and add "Point from: <reference>" when the master's
+`coord_reference` column names the paper the coordinate comes from (141 of 316
+records; blank means not recorded, mostly points entered before the tracker).
+Never present a pollinator list as observed at the mapped site.
