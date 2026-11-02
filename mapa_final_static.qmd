@@ -8,6 +8,9 @@ format:
     toc: true
     toc-location: left
     theme: flatly
+    include-in-header:       # browser-tab icon (Ionopsis and a hummingbird), inline so no file is needed
+      text: |
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='1' y='1' width='62' height='62' rx='14' fill='%23fff' stroke='%23d5d9de' stroke-width='2'/%3E%3Cg transform='translate(14 15) scale(0.64)'%3E%3Cg%3E%3Cellipse cx='0' cy='-10' rx='2.6' ry='6' fill='%23d9a7e6'/%3E%3Cellipse cx='0' cy='-9' rx='2.4' ry='5.5' fill='%23d9a7e6' transform='rotate(-55)'/%3E%3Cellipse cx='0' cy='-9' rx='2.4' ry='5.5' fill='%23d9a7e6' transform='rotate(55)'/%3E%3Cpath d='M0 -1 C-5 -2 -17 2 -16 12 C-15 21 -4 21 0 14 C4 21 15 21 16 12 C17 2 5 -2 0 -1Z' fill='%23f1d7f6' stroke='%23b468c9' stroke-width='1.2'/%3E%3Cg stroke='%239b3fb5' stroke-width='1.3' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 1 L-11 11 M0 1 L-6 15 M0 1 L0 12 M0 1 L6 15 M0 1 L11 11'/%3E%3C/g%3E%3Cellipse cx='0' cy='1' rx='2.6' ry='3' fill='%237d2a98'/%3E%3C/g%3E%3C/g%3E%3Cg transform='translate(35 39) scale(-1.15 1.15) rotate(-12)'%3E%3Cg%3E%3Cpath d='M-1 -2 C-4 -15 -12 -22 -17 -23 C-11 -14 -9 -6 -5 1 Z' fill='%231f6b45'/%3E%3Cpath d='M-7 3 L-18 10 L-13 4 L-17 0 Z' fill='%231f6b45'/%3E%3Cellipse cx='0' cy='0' rx='9' ry='4.8' fill='%232e9e62' transform='rotate(-25)'/%3E%3Ccircle cx='8.5' cy='-5.5' r='4.4' fill='%232e9e62'/%3E%3Cpath d='M5.5 -3 C7 -0.5 10 -0.5 11.5 -3 L9 -1.5Z' fill='%23d81b60'/%3E%3Ccircle cx='9.5' cy='-6.6' r='1' fill='%23fff'/%3E%3Cpath d='M12.3 -6.8 L25 -3.6 L12.3 -4.6Z' fill='%23222'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
     df-print: paged
     code-fold: true          # code chunks start collapsed...
     code-summary: "Show code" # ...with this label to expand them
@@ -182,7 +185,8 @@ psta_col  <- find_col(col_names, "^plant_status$")
 # they are present and the popup code below can rely on them.
 for (cl in c("biome", "ecoregion")) if (!cl %in% names(data)) data[[cl]] <- NA_character_
 # The coordinates in this workbook are NOT the study sites. Each site was moved
-# once, by 10 to 25 km, before the workbook was published, so that the maps do
+# once (10 to 25 km on a continent or large island, within the island on a small
+# island), before the workbook was published, so that the maps do
 # not lead a collector to a population. `coord_displaced` marks the records
 # that were moved; the true coordinates are not in this project.
 if (!"coord_displaced" %in% names(data)) data[["coord_displaced"]] <- NA
@@ -461,7 +465,7 @@ map_data <- map_data %>%
     # Two decimals only: the position is approximate by design.
     "<b>Position:</b> ", round(lat, 2), " , ", round(lon, 2),
     ifelse(!is.na(coord_displaced) & as.logical(coord_displaced),
-           " <span style='color:#888'>(approximate: displaced 10 to 25 km)</span>", ""),
+           " <span style='color:#888'>(approximate: displaced 10 to 25 km, or within the same small island)</span>", ""),
     "<br>",
     "<b>Precision:</b> ",
     ifelse(is.na(precision), "not recorded", unname(precision_labels[precision])), "<br>",
@@ -627,7 +631,7 @@ build_map <- function(df, biomes = FALSE) {
 
   # Two notes at the foot of the map: that the positions are displaced, always;
   # and what the larger, paler circles mean, on a map that has one.
-  note <- "Positions are displaced by 10 to 25 km to protect the orchids from collecting."
+  note <- "Positions are displaced to protect the orchids from collecting: by 10 to 25 km on a continent or a large island, within the same island on a small island."
   if (any(df$precision == "region", na.rm = TRUE)) {
     note <- paste0(note, "<br>Larger, paler circle: the source gives only a general area ",
                    "(state, country or region).")
