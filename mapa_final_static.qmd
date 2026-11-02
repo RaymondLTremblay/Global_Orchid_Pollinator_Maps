@@ -170,6 +170,12 @@ prec_col  <- find_col(col_names, "^coord_precision$")
 # says which paper the point belongs to and that the list is the taxon's.
 ref_col   <- find_col(col_names, "^references$")
 cref_col  <- find_col(col_names, "^coord_reference$")
+# Whether the observations behind the record were made on plants in a wild
+# population or on cultivated ones (garden, greenhouse, nursery, transplants):
+# `plant_status` in the master, `wild` or `cultivated`, blank when not
+# recorded. Added on 2026-10-31 after the paper check found 22 records resting
+# on cultivated plants.
+psta_col  <- find_col(col_names, "^plant_status$")
 # Biome and ecoregion come from the wrangling doc. An enriched workbook written
 # before those columns existed, or on a machine without the lookup layer, does
 # not have them (read.xlsx drops a column that is entirely empty), so make sure
@@ -301,6 +307,10 @@ map_data <- data %>%
     locality = if (!is.na(loc_col)) as.character(.data[[loc_col]]) else NA_character_,
     references = if (!is.na(ref_col)) trimws(as.character(.data[[ref_col]])) else NA_character_,
     coord_ref  = if (!is.na(cref_col)) trimws(as.character(.data[[cref_col]])) else NA_character_,
+    plant_status = {
+      v <- if (!is.na(psta_col)) tolower(trimws(as.character(.data[[psta_col]]))) else NA_character_
+      ifelse(v %in% c("wild", "cultivated"), v, NA_character_)
+    },
 
     # Coordinate precision, kept only when it is one of the three known levels.
     precision = {
@@ -457,6 +467,11 @@ map_data <- map_data %>%
     ifelse(is.na(precision), "not recorded", unname(precision_labels[precision])), "<br>",
     ifelse(is.na(coord_ref) | coord_ref == "", "",
            paste0("<b>Point from:</b> ", htmltools::htmlEscape(coord_ref), "<br>")),
+    ifelse(is.na(plant_status), "",
+           paste0("<b>Plants observed:</b> ",
+                  ifelse(plant_status == "wild", "wild population",
+                         "cultivated (garden, greenhouse or nursery), not a wild population"),
+                  "<br>")),
     trait_row("Biome", biome),
     trait_row("Ecoregion", ecoregion),
     trait_row("Growth form",     growth_form),

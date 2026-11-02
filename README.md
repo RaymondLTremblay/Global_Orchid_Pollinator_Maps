@@ -23,18 +23,40 @@ and 25 km, in a random direction:
 - the biome, ecoregion and realm of each record are those of its TRUE position.
 
 The column `coord_displaced` in the workbook marks the records that were moved.
-A few records could not be moved because no land lies within 25 km of them;
-they are coordinates at sea, or on small islands that the ecoregion map does
-not draw.
+A site on a small island that the ecoregion map does not draw has no land
+between 10 and 25 km. Such a site was moved instead to a random position on
+the same island, at least 1 km from the true one where the island allows it,
+using a 1 km land/sea grid; neighbouring islands were excluded, so the point
+never leaves its island. A few records are still in place because their
+coordinates lie at sea; they are being corrected.
 
 The true coordinates are not public. Researchers who need them for a specific
 purpose can write to raymond.tremblay@gmail.com.
+
+## How to read a record
+
+- **The pollinators are those of the taxon, not of the point.** The database
+  lists the pollinators of an orchid from all the references cited for it.
+  The mapped point usually comes from one of those references (the popup
+  names it as "Point from" when it is known). A pollinator in the list was
+  not necessarily observed at the mapped site.
+- **The database is not a complete review of the literature.** A paper is
+  recorded only if it adds a datum to one of the database's categories; a
+  later paper that repeats what is already known is not cited. The first
+  paper found that supplies a datum is the one listed.
+- **Wild or cultivated.** Where it is known, the popup says whether the
+  observations were made on plants in a wild population or on cultivated
+  plants (garden, greenhouse or nursery). For cultivated plants the point is
+  their wild origin when the paper gives it.
+- **Not every record is mapped yet.** The coordinates are being added from
+  the primary literature, and records without them do not appear on the
+  maps.
 
 ## What is here
 
 | File | What it is |
 |---|---|
-| `Pollination_List_pollinators_enriched.xlsx` | The data: one row per orchid record, with traits, pollinators parsed to order, family and genus, displaced coordinates, coordinate precision, biome, ecoregion and realm |
+| `Pollination_List_pollinators_enriched.xlsx` | The data: one row per orchid record, with traits, pollinators parsed to order, family and genus, displaced coordinates, coordinate precision, the reference of the mapped point (`coord_reference`), wild or cultivated plants (`plant_status`), biome, ecoregion and realm |
 | `mapa_final_static.qmd` | The distribution maps, rendered to `docs/mapa_final_static.html` |
 | `mapa_final.qmd` | The same maps with the interactive explorer (Quarto with Shiny) |
 | `pollinator_map.qmd` | A search map by orchid and by pollinator (Quarto with Shiny) |
@@ -51,7 +73,9 @@ The pollination records are those of the global orchid pollination database of
 Ackerman et al. (2023), *Beyond the various contrivances by which orchids are
 pollinated: global patterns in orchid pollination biology*, Botanical Journal
 of the Linnean Society 202: 295-324, archived at
-<https://doi.org/10.5281/zenodo.7263689> (CC BY 4.0). This project adds the
+<https://doi.org/10.5281/zenodo.7263689> (CC BY 4.0). The maps use version
+1.4.0, "Pollination List Thru 2025"
+(<https://doi.org/10.5281/zenodo.18208949>). This project adds the
 georeferencing.
 
 Biomes and ecoregions: RESOLVE Ecoregions 2017, Dinerstein et al. (2017),

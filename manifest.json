@@ -1791,30 +1791,30 @@
       "description": {
         "Package": "readxl",
         "Title": "Read Excel Files",
-        "Version": "1.5.0.1",
-        "Authors@R": "c(\n    person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0003-4757-117X\")),\n    person(\"Jennifer\", \"Bryan\", , \"jenny@posit.co\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0002-6983-2759\")),\n    person(\"Posit, PBC\", role = c(\"cph\", \"fnd\"),\n           comment = \"Copyright holder of all R code and all C/C++ code without explicit copyright attribution\"),\n    person(\"Marcin\", \"Kalicinski\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included RapidXML code\"),\n    person(\"Komarov Valery\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Christophe Leitienne\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Bob Colbert\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"David Hoerl\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Evan Miller\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\")\n  )",
-        "Description": "Import excel files into R. Supports '.xls' via the embedded\n    'libxls' C library <https://github.com/libxls/libxls> and '.xlsx' via\n    the embedded 'RapidXML' C++ library\n    <https://rapidxml.sourceforge.net/>.  Works on Windows, Mac and Linux\n    without external dependencies.",
+        "Version": "1.6.0",
+        "Authors@R": "c(\n    person(\"Hadley\", \"Wickham\", , \"hadley@posit.co\", role = \"aut\",\n           comment = c(ORCID = \"0000-0003-4757-117X\")),\n    person(\"Jennifer\", \"Bryan\", , \"jenny@posit.co\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0002-6983-2759\")),\n    person(\"Posit, PBC\", role = c(\"cph\", \"fnd\"),\n           comment = \"Copyright holder of all R code and all C/C++ code without explicit copyright attribution\"),\n    person(\"Marcin\", \"Kalicinski\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included RapidXML code\"),\n    person(\"Komarov Valery\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Christophe Leitienne\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Bob Colbert\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"David Hoerl\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"Evan Miller\", role = c(\"ctb\", \"cph\"),\n           comment = \"Author of included libxls code\"),\n    person(\"kokke\", role = \"ctb\",\n           comment = \"Author of included tiny-AES-c code\")\n  )",
+        "Description": "Import excel files into R. Supports '.xls' via the embedded\n    'libxls' C library <https://github.com/libxls/libxls> and '.xlsx' via\n    the embedded 'RapidXML' C++ library\n    <https://rapidxml.sourceforge.net/>.  Works on Windows, Mac and Linux\n    without external dependencies. Reading of password-encrypted '.xlsx'\n    files is supported via the embedded 'tiny-AES-c' C library\n    <https://github.com/kokke/tiny-AES-c>.",
         "License": "MIT + file LICENSE",
         "URL": "https://readxl.tidyverse.org, https://github.com/tidyverse/readxl",
         "BugReports": "https://github.com/tidyverse/readxl/issues",
-        "Depends": "R (>= 4.1)",
-        "Imports": "cellranger, tibble (>= 2.0.1), utils",
-        "Suggests": "covr, knitr, rmarkdown, testthat (>= 3.1.6), withr",
+        "Depends": "R (>= 4.2)",
+        "Imports": "cellranger, cli, rlang, tibble (>= 2.0.1), utils",
+        "Suggests": "askpass, covr, knitr, rmarkdown, testthat (>= 3.1.6), withr",
         "LinkingTo": "cpp11 (>= 0.5.5), progress",
         "VignetteBuilder": "knitr",
         "Config/build/compilation-database": "true",
         "Config/Needs/website": "tidyverse/tidytemplate, tidyverse",
-        "Config/roxygen2/version": "8.0.0",
+        "Config/roxygen2/version": "8.1.0",
         "Config/testthat/edition": "3",
         "Encoding": "UTF-8",
-        "Note": "libxls v1.6.3 c199d13",
+        "Note": "libxls v1.6.4 34c7cc6; tiny-AES-c 2385675",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-09-16 07:49:42 UTC; ripley",
-        "Author": "Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),\n  Jennifer Bryan [aut, cre] (ORCID:\n    <https://orcid.org/0000-0002-6983-2759>),\n  Posit, PBC [cph, fnd] (Copyright holder of all R code and all C/C++\n    code without explicit copyright attribution),\n  Marcin Kalicinski [ctb, cph] (Author of included RapidXML code),\n  Komarov Valery [ctb, cph] (Author of included libxls code),\n  Christophe Leitienne [ctb, cph] (Author of included libxls code),\n  Bob Colbert [ctb, cph] (Author of included libxls code),\n  David Hoerl [ctb, cph] (Author of included libxls code),\n  Evan Miller [ctb, cph] (Author of included libxls code)",
+        "Packaged": "2026-10-16 22:54:36 UTC; jenny",
+        "Author": "Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>),\n  Jennifer Bryan [aut, cre] (ORCID:\n    <https://orcid.org/0000-0002-6983-2759>),\n  Posit, PBC [cph, fnd] (Copyright holder of all R code and all C/C++\n    code without explicit copyright attribution),\n  Marcin Kalicinski [ctb, cph] (Author of included RapidXML code),\n  Komarov Valery [ctb, cph] (Author of included libxls code),\n  Christophe Leitienne [ctb, cph] (Author of included libxls code),\n  Bob Colbert [ctb, cph] (Author of included libxls code),\n  David Hoerl [ctb, cph] (Author of included libxls code),\n  Evan Miller [ctb, cph] (Author of included libxls code),\n  kokke [ctb] (Author of included tiny-AES-c code)",
         "Maintainer": "Jennifer Bryan <jenny@posit.co>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-09-16 07:53:07 UTC",
-        "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-09-16 23:33:21 UTC; unix",
+        "Date/Publication": "2026-10-17 07:20:02 UTC",
+        "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-10-17 08:23:21 UTC; unix",
         "Archs": "readxl.so.dSYM"
       }
     },
@@ -1911,7 +1911,7 @@
       "description": {
         "Package": "s2",
         "Title": "Spherical Geometry Operators Using the S2 Geometry Library",
-        "Version": "1.1.11",
+        "Version": "1.1.13",
         "Authors@R": "c(\n     person(given = \"Dewey\",\n           family = \"Dunnington\",\n           role = c(\"aut\"),\n           email = \"dewey@fishandwhistle.net\",\n           comment = c(ORCID = \"0000-0002-9415-4582\")),\n     person(given = \"Edzer\",\n             family = \"Pebesma\",\n             role = c(\"aut\", \"cre\"),\n             email = \"edzer.pebesma@uni-muenster.de\",\n             comment = c(ORCID = \"0000-0001-8049-7069\")),\n    person(\"Ege\", \"Rubak\", email=\"rubak@math.aau.dk\", role = c(\"aut\")),\n    person(\"Jeroen\", \"Ooms\", , \"jeroen.ooms@stat.ucla.edu\", role = \"ctb\", comment = \"configure script\"),\n    person(family = \"Google, Inc.\", role = \"cph\", comment = \"Original s2geometry.io source code\")\n  )",
         "Description": "Provides R bindings for Google's s2 library for geometric calculations on\n    the sphere. High-performance constructors and exporters provide high compatibility\n    with existing spatial packages, transformers construct new geometries from existing\n    geometries, predicates provide a means to select geometries based on spatial\n    relationships, and accessors extract information about geometries.",
         "License": "Apache License (== 2.0)",
@@ -1927,12 +1927,12 @@
         "Config/testthat/edition": "3",
         "Config/roxygen2/version": "8.0.0",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-06-01 09:16:23 UTC; edzer",
+        "Packaged": "2026-09-28 07:24:41 UTC; edzer",
         "Author": "Dewey Dunnington [aut] (ORCID: <https://orcid.org/0000-0002-9415-4582>),\n  Edzer Pebesma [aut, cre] (ORCID:\n    <https://orcid.org/0000-0001-8049-7069>),\n  Ege Rubak [aut],\n  Jeroen Ooms [ctb] (configure script),\n  Google, Inc. [cph] (Original s2geometry.io source code)",
         "Maintainer": "Edzer Pebesma <edzer.pebesma@uni-muenster.de>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-06-01 10:30:02 UTC",
-        "Built": "R 4.6.0; aarch64-apple-darwin23; 2026-06-01 15:24:00 UTC; unix",
+        "Date/Publication": "2026-09-28 08:30:02 UTC",
+        "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-09-28 11:01:38 UTC; unix",
         "Archs": "s2.so.dSYM"
       }
     },
@@ -2091,7 +2091,7 @@
       "Repository": "https://cloud.r-project.org",
       "description": {
         "Package": "sp",
-        "Version": "2.2-3",
+        "Version": "2.2-4",
         "Title": "Classes and Methods for Spatial Data",
         "Authors@R": "c(person(\"Edzer\", \"Pebesma\", role = c(\"aut\", \"cre\"),\n\t\t\t\temail = \"edzer.pebesma@uni-muenster.de\"),\n\t\t\tperson(\"Roger\", \"Bivand\", role = \"aut\",\n            \temail = \"Roger.Bivand@nhh.no\"),\n\t\t\tperson(\"Barry\", \"Rowlingson\", role = \"ctb\"),\n\t\t\tperson(\"Virgilio\", \"Gomez-Rubio\", role = \"ctb\"),\n\t\t\tperson(\"Robert\", \"Hijmans\", role = \"ctb\"),\n\t\t\tperson(\"Michael\", \"Sumner\", role = \"ctb\"),\n\t\t\tperson(\"Don\", \"MacQueen\", role = \"ctb\"),\n\t\t\tperson(\"Jim\", \"Lemon\", role = \"ctb\"),\n                        person(\"Finn\", \"Lindgren\", role = \"ctb\"),\n\t\t\tperson(\"Josh\", \"O'Brien\", role = \"ctb\"),\n\t\t\tperson(\"Joseph\", \"O'Rourke\", role = \"ctb\"),\n            person(\"Patrick\", \"Hausmann\", role = \"ctb\"),\n            person(\"Sebastian\", \"Meyer\", role = \"ctb\"))",
         "Depends": "R (>= 3.5.0), methods",
@@ -2104,13 +2104,19 @@
         "Collate": "bpy.colors.R AAA.R Class-CRS.R CRS-methods.R Class-Spatial.R\nSpatial-methods.R projected.R Class-SpatialPoints.R\nSpatialPoints-methods.R Class-SpatialPointsDataFrame.R\nSpatialPointsDataFrame-methods.R Class-SpatialMultiPoints.R\nSpatialMultiPoints-methods.R\nClass-SpatialMultiPointsDataFrame.R\nSpatialMultiPointsDataFrame-methods.R Class-GridTopology.R\nClass-SpatialGrid.R Class-SpatialGridDataFrame.R\nClass-SpatialLines.R SpatialLines-methods.R\nClass-SpatialLinesDataFrame.R SpatialLinesDataFrame-methods.R\nClass-SpatialPolygons.R Class-SpatialPolygonsDataFrame.R\nSpatialPolygons-methods.R SpatialPolygonsDataFrame-methods.R\nGridTopology-methods.R SpatialGrid-methods.R\nSpatialGridDataFrame-methods.R SpatialPolygons-internals.R\npoint.in.polygon.R SpatialPolygons-displayMethods.R zerodist.R\nimage.R stack.R bubble.R mapasp.R select.spatial.R gridded.R\nasciigrid.R spplot.R over.R spsample.R recenter.R dms.R\ngridlines.R spdists.R rbind.R flipSGDF.R chfids.R loadmeuse.R\ncompassRose.R surfaceArea.R spOptions.R subset.R disaggregate.R\nsp_spat1.R merge.R aggregate.R elide.R sp2Mondrian.R",
         "VignetteBuilder": "knitr",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-07-15 13:18:11 UTC; edzer",
+        "Packaged": "2026-10-11 14:25:55 UTC; edzer",
         "Author": "Edzer Pebesma [aut, cre],\n  Roger Bivand [aut],\n  Barry Rowlingson [ctb],\n  Virgilio Gomez-Rubio [ctb],\n  Robert Hijmans [ctb],\n  Michael Sumner [ctb],\n  Don MacQueen [ctb],\n  Jim Lemon [ctb],\n  Finn Lindgren [ctb],\n  Josh O'Brien [ctb],\n  Joseph O'Rourke [ctb],\n  Patrick Hausmann [ctb],\n  Sebastian Meyer [ctb]",
         "Maintainer": "Edzer Pebesma <edzer.pebesma@uni-muenster.de>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-07-19 16:10:02 UTC",
-        "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-07-19 18:52:22 UTC; unix",
-        "Archs": "sp.so.dSYM"
+        "Date/Publication": "2026-10-11 22:30:09 UTC",
+        "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-10-12 04:02:34 UTC; unix",
+        "Archs": "sp.so.dSYM",
+        "RemoteType": "standard",
+        "RemotePkgRef": "sp",
+        "RemoteRef": "sp",
+        "RemoteRepos": "https://cran.rstudio.com",
+        "RemotePkgPlatform": "aarch64-apple-darwin23",
+        "RemoteSha": "2.2-4"
       }
     },
     "stringi": {
@@ -2546,25 +2552,25 @@
         "Package": "xfun",
         "Type": "Package",
         "Title": "Supporting Functions for Packages Maintained by 'Yihui Xie'",
-        "Version": "0.61",
+        "Version": "0.62",
         "Authors@R": "c(\n  person(\"Yihui\", \"Xie\", role = c(\"aut\", \"cre\", \"cph\"), email = \"xie@yihui.name\", comment = c(ORCID = \"0000-0003-0645-5666\", URL = \"https://yihui.org\")),\n  person(\"Wush\", \"Wu\", role = \"ctb\"),\n  person(\"Daijiang\", \"Li\", role = \"ctb\"),\n  person(\"Xianying\", \"Tan\", role = \"ctb\"),\n  person(\"Salim\", \"Brüggemann\", role = \"ctb\", email = \"salim-b@pm.me\", comment = c(ORCID = \"0000-0002-5329-5987\")),\n  person(\"Christophe\", \"Dervieux\", role = \"ctb\"),\n  person()\n  )",
         "Description": "Miscellaneous functions commonly used in other packages maintained by 'Yihui Xie'.",
         "Depends": "R (>= 3.2.0)",
         "Imports": "grDevices, stats, tools",
-        "Suggests": "testit, parallel, codetools, methods, rstudioapi, tinytex (>=\n0.30), mime, litedown (>= 0.6), commonmark, knitr (>= 1.50),\nremotes, pak, curl, xml2, jsonlite, magick, yaml, data.table,\nqs2",
+        "Suggests": "testit, parallel, codetools, methods, rstudioapi, tinytex (>=\n0.30), mime, litedown (>= 0.6), knitr (>= 1.50), remotes, pak,\ncurl, xml2, jsonlite, magick, yaml, data.table, qs2",
         "License": "MIT + file LICENSE",
         "URL": "https://github.com/yihui/xfun",
         "BugReports": "https://github.com/yihui/xfun/issues",
         "Encoding": "UTF-8",
         "VignetteBuilder": "litedown",
-        "Config/roxygen2/version": "8.1.0",
+        "Config/roxygen2/version": "8.1.1",
         "NeedsCompilation": "yes",
-        "Packaged": "2026-09-16 17:36:20 UTC; yihui",
+        "Packaged": "2026-10-16 01:24:19 UTC; yihui",
         "Author": "Yihui Xie [aut, cre, cph] (ORCID:\n    <https://orcid.org/0000-0003-0645-5666>, URL: https://yihui.org),\n  Wush Wu [ctb],\n  Daijiang Li [ctb],\n  Xianying Tan [ctb],\n  Salim Brüggemann [ctb] (ORCID: <https://orcid.org/0000-0002-5329-5987>),\n  Christophe Dervieux [ctb]",
         "Maintainer": "Yihui Xie <xie@yihui.name>",
         "Repository": "CRAN",
-        "Date/Publication": "2026-09-16 18:30:02 UTC",
-        "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-09-16 22:39:51 UTC; unix",
+        "Date/Publication": "2026-10-16 03:30:02 UTC",
+        "Built": "R 4.6.1; aarch64-apple-darwin23; 2026-10-16 06:50:48 UTC; unix",
         "Archs": "xfun.so.dSYM"
       }
     },
@@ -2658,10 +2664,10 @@
       "checksum": "62c2c64532863c8ccbdf81b56be600d3"
     },
     "mapa_final.qmd": {
-      "checksum": "10273619cdcca1a0cf85ad895cb3de36"
+      "checksum": "fa937fba2e5075af7c6c6b7c60add26a"
     },
     "Pollination_List_pollinators_enriched.xlsx": {
-      "checksum": "bf9c63b9d0c06675273b2e653f4046ea"
+      "checksum": "4c5b73d5a8525cd4ab59cb6e566e23d0"
     }
   },
   "users": null

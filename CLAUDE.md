@@ -65,3 +65,16 @@ references, and add "Point from: <reference>" when the master's
 `coord_reference` column names the paper the coordinate comes from (141 of 316
 records; blank means not recorded, mostly points entered before the tracker).
 Never present a pollinator list as observed at the mapped site.
+
+**Wild or cultivated** (since 2026-10-31): the popups (all three map
+documents) add "Plants observed: wild population" or "cultivated (garden,
+greenhouse or nursery), not a wild population" from the workbook column
+`plant_status`, and say nothing when it is blank. Small islands that the
+ecoregion map does not draw are displaced to a random point on the same
+island (see README.md); the method is in the private project's CLAUDE.md.
+
+**Data version** (since 2026-10-03): Ackerman et al. database v1.4.0,
+"Pollination List Thru 2025", doi:10.5281/zenodo.18208949. Cite it with the
+2022 record and the 2023 paper. The README states the three caveats a reader
+needs (pollinators per taxon, not a complete literature review, not every
+record mapped yet); keep them when the README is edited.
